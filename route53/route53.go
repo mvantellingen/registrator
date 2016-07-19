@@ -12,6 +12,7 @@ import (
 
 	"github.com/awslabs/aws-sdk-go/aws"
 	"github.com/awslabs/aws-sdk-go/aws/awserr"
+    "github.com/aws/aws-sdk-go/aws/session"
 	r53 "github.com/awslabs/aws-sdk-go/service/route53"
 	"github.com/gliderlabs/registrator/bridge"
 )
@@ -40,7 +41,8 @@ func (f *Factory) New(uri *url.URL) bridge.RegistryAdapter {
 		log.Fatal("must provide zoneId. e.g. route53://zoneId")
 	}
 
-	return &Route53Registry{client: r53.New(nil), path: uri.Path, useEc2Meatadata: useEc2Meatadata, zoneId: zoneId}
+    sess := session.New()
+	return &Route53Registry{client: r53.New(sess), path: uri.Path, useEc2Meatadata: useEc2Meatadata, zoneId: zoneId}
 }
 
 type Route53Registry struct {
@@ -58,6 +60,9 @@ func (r *Route53Registry) Ping() error {
 		Id: aws.String(r.zoneId),
 	}
 	resp, err := r.client.GetHostedZone(params)
+	if err != nil {
+		log.Fatal("route53: failed getHostedZone() call")
+	}
 
 	r.dnsSuffix = *resp.HostedZone.Name
 	return err
@@ -73,6 +78,9 @@ func (r *Route53Registry) Register(service *bridge.Service) error {
 	// append our new record and persist
 	var recordSet ResourceRecordSet
 	recordSet, err := r.GetServiceEntry(r.zoneId, name)
+	if err != nil {
+		log.Fatal("route53: failed GetServiceEntry() call")
+	}
 
 	if recordSet.nameIs(name) {
 		// update existing DNS record
