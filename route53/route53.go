@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/awslabs/aws-sdk-go/aws"
 	"github.com/awslabs/aws-sdk-go/aws/awserr"
-    "github.com/aws/aws-sdk-go/aws/session"
 	r53 "github.com/awslabs/aws-sdk-go/service/route53"
 	"github.com/gliderlabs/registrator/bridge"
 )
@@ -41,7 +41,7 @@ func (f *Factory) New(uri *url.URL) bridge.RegistryAdapter {
 		log.Fatal("must provide zoneId. e.g. route53://zoneId")
 	}
 
-    sess := session.New()
+	sess := session.New()
 	return &Route53Registry{client: r53.New(sess), path: uri.Path, useEc2Meatadata: useEc2Meatadata, zoneId: zoneId}
 }
 
