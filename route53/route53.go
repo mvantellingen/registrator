@@ -55,7 +55,7 @@ type Route53Registry struct {
 // as a suffix to all DNS name entries
 func (r *Route53Registry) Ping() error {
 	params := &r53.GetHostedZoneInput{
-		ID: aws.String(r.zoneId),
+		Id: aws.String(r.zoneId),
 	}
 	resp, err := r.client.GetHostedZone(params)
 
@@ -141,7 +141,7 @@ func (r *Route53Registry) Refresh(service *bridge.Service) error {
 // Gets route53 service entry for the provided zoneId and recordName
 func (r *Route53Registry) GetServiceEntry(zoneId string, recordName string) ([]*r53.ResourceRecordSet, error) {
 	params := &r53.ListResourceRecordSetsInput{
-		HostedZoneID:    aws.String(zoneId),
+		HostedZoneId:    aws.String(zoneId),
 		StartRecordName: aws.String(recordName),
 		MaxItems:        aws.String("1"),
 	}
@@ -171,14 +171,14 @@ func (r *Route53Registry) UpdateDns(zoneId string, recordName string, action str
 						Type:            aws.String("SRV"),      // Required
 						ResourceRecords: resourceRecords,
 						SetIdentifier:   aws.String("ResourceRecordSetIdentifier"),
-						TTL:             aws.Long(1),
-						Weight:          aws.Long(1),
+						TTL:             aws.Int64(1),
+						Weight:          aws.Int64(1),
 					},
 				},
 			},
 			Comment: aws.String(fmt.Sprintf("Adds a SRV DNS record for %s", recordName)),
 		},
-		HostedZoneID: aws.String(zoneId), // Required
+		HostedZoneId: aws.String(zoneId), // Required
 	}
 	_, err := r.client.ChangeResourceRecordSets(params)
 
